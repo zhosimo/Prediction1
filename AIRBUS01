@@ -1,0 +1,106 @@
+# Instalación de librerías (si es necesario)
+# Solo ejecuta si es la primera vez que usas estas librerías:
+!pip install pandas numpy matplotlib seaborn statsmodels
+
+# 1.Importación de librerías
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from statsmodels.tsa.arima.model import ARIMA
+import warnings
+
+# Estilo y advertencias
+warnings.filterwarnings("ignore")
+sns.set(style="whitegrid")
+
+# 2. Simulación: Ganancia Neta Trimestral 2015–2024
+# Fechas trimestrales
+fechas = pd.date_range(start="2015-01-01", end="2024-12-31", freq="Q")
+
+# Simulación de ganancias netas (con tendencia creciente y ruido)
+np.random.seed(42)
+ganancias_netas = np.linspace(800, 2000, len(fechas)) + np.random.normal(0, 180, len(fechas))
+
+# Crear DataFrame
+df_net_income = pd.DataFrame({
+    "Fecha": fechas,
+    "Ganancia_Neta_Millones_USD": ganancias_netas
+})
+df_net_income.set_index("Fecha", inplace=True)
+
+# Visualización
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=df_net_income, x=df_net_income.index, y="Ganancia_Neta_Millones_USD", linewidth=2.5)
+plt.title("Ganancia Neta Trimestral Simulada de Airbus (2015–2024)")
+plt.xlabel("Fecha")
+plt.ylabel("Ganancia Neta (Millones USD)")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# 3. Proyección: Ganancia Neta Trimestral 2025–2027 (ARIMA)
+# Ajustar modelo ARIMA
+modelo = ARIMA(df_net_income["Ganancia_Neta_Millones_USD"], order=(2,1,2))
+modelo_ajustado = modelo.fit()
+
+# Pronóstico para 12 trimestres (3 años)
+proyeccion = modelo_ajustado.forecast(steps=12)
+fechas_futuras = pd.date_range(start="2025-03-31", periods=12, freq="Q")
+
+# Crear DataFrame de proyección
+df_proyeccion = pd.DataFrame({
+    "Fecha": fechas_futuras,
+    "Proyeccion_Ganancia_Neta": proyeccion
+})
+df_proyeccion.set_index("Fecha", inplace=True)
+
+# Visualización combinada
+plt.figure(figsize=(14, 6))
+sns.lineplot(data=df_net_income, x=df_net_income.index, y="Ganancia_Neta_Millones_USD", label="Histórico", linewidth=2.5)
+sns.lineplot(data=df_proyeccion, x=df_proyeccion.index, y="Proyeccion_Ganancia_Neta", label="Proyección 2025–2027", linestyle="--", linewidth=2.5)
+plt.title("Proyección Trimestral de Ganancia Neta de Airbus (2025–2027)")
+plt.xlabel("Fecha")
+plt.ylabel("Ganancia Neta (Millones USD)")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# 4. Tabla resumen: Proyección por Trimestre
+df_proyeccion
+
+# Importar librerías necesarias
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Crear fechas trimestrales (12 trimestres = 3 años)
+fechas_trimestres = pd.date_range(start="2025-03-31", periods=12, freq="Q")
+
+# 2. Simular datos de Ganancia Neta Trimestral
+np.random.seed(42)
+ganancias_trimestrales = np.linspace(2000, 2300, 12) + np.random.normal(0, 80, 12)
+
+# 3. Crear DataFrame de proyección
+df_proyeccion = pd.DataFrame({
+    "Fecha": fechas_trimestres,
+    "Ganancia_Neta_Proyectada": ganancias_trimestrales
+})
+df_proyeccion.set_index("Fecha", inplace=True)
+
+# 4. Graficar línea de proyección
+plt.figure(figsize=(12, 6))
+plt.plot(df_proyeccion.index, df_proyeccion["Ganancia_Neta_Proyectada"],
+         marker='o', color='royalblue', linewidth=2)
+
+# 5. Estética del gráfico
+plt.title("Proyección Trimestral de Ganancia Neta de Airbus (2025–2027)", fontsize=14)
+plt.xlabel("Trimestre", fontsize=12)
+plt.ylabel("Ganancia Neta Proyectada (Millones USD)", fontsize=12)
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.xticks(rotation=45)
+
+# 6. Mostrar
+plt.tight_layout()
+plt.show()

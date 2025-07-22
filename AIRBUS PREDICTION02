@@ -1,0 +1,99 @@
+# 1. Importar librerías
+import pandas as pd
+import numpy as np
+
+# 2. Simular datos trimestrales proyectados (2025–2027)
+# Crear fechas trimestrales proyectadas
+fechas_trimestres = pd.date_range(start="2025-03-31", periods=12, freq="QE")
+
+# Simular proyección de ganancia neta con tendencia creciente
+np.random.seed(42)  # reproducibilidad
+proyeccion_ganancia = np.linspace(2000, 2300, 12) + np.random.normal(0, 100, 12)
+
+# Crear DataFrame
+df_proyeccion = pd.DataFrame({
+    "Fecha": fechas_futuras,
+    "Proyeccion_Ganancia_Neta": proyeccion_ganancia
+})
+df_proyeccion.set_index("Fecha", inplace=True)
+
+# 3. Agrupar por año y calcular proyecciones anuales
+# Agregar columna de año
+df_proyeccion["Año"] = df_proyeccion.index.year
+
+# Agrupar por año y sumar ganancia neta anual
+ganancia_neta_anual = df_proyeccion.groupby("Año")["Proyeccion_Ganancia_Neta"].sum().to_frame()
+ganancia_neta_anual.columns = ["Ganancia_Neta_Anual"]
+
+# 4. Calcular EBITDA y Margen Neto estimado
+# Suposición de EBITDA ≈ 1.6 * Ganancia neta
+ganancia_neta_anual["EBITDA_Proyectado"] = ganancia_neta_anual["Ganancia_Neta_Anual"] * 1.6
+
+# Simular margen neto entre 11% y 12.5%
+ganancia_neta_anual["Margen_Neto_Estimado (%)"] = np.random.uniform(11.0, 12.5, size=len(ganancia_neta_anual)).round(2)
+
+# 5. Mostrar la tabla final
+ganancia_neta_anual
+
+import pandas as pd
+import numpy as np
+
+# Simulación base
+fechas_trimestres = pd.date_range(start="2025-03-31", periods=12, freq="QE")
+np.random.seed(42)
+ganancias_trimestrales = np.linspace(2000, 2300, 12) + np.random.normal(0, 80, 12)
+
+df_trimestral = pd.DataFrame({
+    "Fecha": fechas_trimestres,
+    "Ganancia_Neta_Millones_USD": ganancias_trimestrales
+})
+df_trimestral.set_index("Fecha", inplace=True)
+df_trimestral["Año"] = df_trimestral.index.year
+
+df_anual = df_trimestral.groupby("Año")["Ganancia_Neta_Millones_USD"].sum().to_frame()
+df_anual.rename(columns={"Ganancia_Neta_Millones_USD": "Ganancia_Neta_Anual"}, inplace=True)
+df_anual["EBITDA_Proyectado"] = df_anual["Ganancia_Neta_Anual"] * 1.6
+df_anual["Margen_Neto_Estimado (%)"] = np.round(np.random.uniform(11.0, 12.5, size=len(df_anual)), 2)
+
+# Importar librería para gráficos
+import matplotlib.pyplot as plt
+
+# Asegurarte de tener estos datos cargados desde pasos anteriores:
+# df_anual con columnas: "Ganancia_Neta_Anual", "EBITDA_Proyectado", "Margen_Neto_Estimado (%)"
+
+# Crear figura y eje principal
+fig, ax1 = plt.subplots(figsize=(10, 6))
+
+# Eje X: años en texto
+anios = df_anual.index.astype(str)
+
+# Barras para Ganancia Neta (azul claro) y EBITDA (verde)
+ax1.bar(anios, df_anual["Ganancia_Neta_Anual"], width=0.4, align='edge',
+        label="Ganancia Neta Anual", color='skyblue', alpha=0.8)
+
+ax1.bar(anios, df_anual["EBITDA_Proyectado"], width=-0.4, align='edge',
+        label="EBITDA Proyectado", color='mediumseagreen', alpha=0.8)
+
+# Eje Y izquierdo: valores monetarios
+ax1.set_ylabel("Millones de USD", fontsize=12)
+ax1.set_title("Proyección Anual de Airbus: Ganancia Neta, EBITDA y Margen Neto (%)", fontsize=14)
+ax1.legend(loc="upper left")
+ax1.grid(axis='y', linestyle='--', alpha=0.6)
+
+# Eje Y derecho para Margen Neto (%)
+ax2 = ax1.twinx()
+ax2.plot(anios, df_anual["Margen_Neto_Estimado (%)"], color="crimson", marker="o",
+         label="Margen Neto Estimado (%)", linewidth=2)
+
+ax2.set_ylabel("Margen Neto (%)", color="crimson", fontsize=12)
+ax2.tick_params(axis="y", labelcolor="crimson")
+
+# Añadir etiquetas de % encima de cada punto
+for i, año in enumerate(anios):
+    valor = df_anual["Margen_Neto_Estimado (%)"].iloc[i]
+    ax2.annotate(f'{valor}%', xy=(año, valor), xytext=(0, 8), textcoords="offset points",
+                 ha='center', color='crimson', fontsize=10)
+
+# Mostrar todo ajustado
+fig.tight_layout()
+plt.show()
